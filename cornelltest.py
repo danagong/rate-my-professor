@@ -12,12 +12,13 @@ import csv
 #driverLocation = '/Users/danagong/Documents/WebDriver' #if windows
 # driver = webdriver.Chrome(driverLocation) 
 
-# driver = webdriver.Chrome()
-
+# open a csv file and write in the columns we want. 
+# If you're running this I would reccmend renaming it so you don't overwrite the original file.
 csv_file = open('cornell.csv', 'w')
 writer = csv.writer(csv_file)
 writer.writerow(['professor', 'content', 'class_level','rating', 'date'])
 
+# most of these are disabling/closing popups
 options = Options()
 options.add_argument("--disable-notifications")
 options.add_argument("start-maximized")
@@ -32,17 +33,15 @@ options.add_argument("--disable-gpu");
 driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
 # driver.get("https://www.ratemyprofessors.com/search/teachers?query=*&sid=298")
 
+# passing in the url we want it to look at
 driver.get("https://www.ratemyprofessors.com/campusRatings.jsp?sid=298")
 
+# using the wait command to close a cookie popup that the previous options didn't account for
 WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, "//button[@class='big-close ccpa-close']"))).click()
 
 
 button = driver.find_element_by_xpath('//div[@class = "content"]')
 
-for i in range(5): # manually assigned range
-	driver.execute_script("arguments[0].click();", button)
-	print("professors page button click " + str(i + 1))
-	time.sleep(1)
 
 prof_urls = ['https://www.ratemyprofessors.com/ShowRatings.jsp?tid=202231', 'https://www.ratemyprofessors.com/ShowRatings.jsp?tid=261710', 'https://www.ratemyprofessors.com/ShowRatings.jsp?tid=1705832',
     'https://www.ratemyprofessors.com/ShowRatings.jsp?tid=172666', 'https://www.ratemyprofessors.com/ShowRatings.jsp?tid=56605',
@@ -65,21 +64,21 @@ prof_names = ['Daisy Fan','David Gries','Walker White','Graeme Bailey', 'David S
 
 count = 0
 for url in prof_urls:
+    # using time.sleep just ensures that the entire page can load so selenium can find everything.
     time.sleep(2)
+    # go to each of the urls in our list
     driver.get(url)
-    
-    # try:
-        # driver.find_element_by_xpath('//a[@id = "bx-close-inside-1177612]').click()
-    # except:
-        # print("no ad")
 
+    # keeping track of our professor names
     name = prof_names[count]
     print(name)
     # print(url)
 
+    # printing out the overall number of ratings for each professor.
     num_ratings = driver.find_element_by_xpath("//li[@class='TeacherRatingTabs__StyledTab-pnmswv-2 bOzrdx react-tabs__tab--selected']").text.split(" ")[0]
     # print(num_ratings)
 
+    # calcuate how many load more buttons we need to click
     button_clicks = (int(num_ratings) - 20)/10
 
     
@@ -105,12 +104,14 @@ for url in prof_urls:
        
         class_level = review.find_element_by_xpath('.//div[@class="RatingHeader__StyledClass-sc-1dlkqw1-2 gxDIt"]').get_attribute("innerText")
         score = review.find_element_by_xpath('.//div[@class="RatingValues__StyledRatingValues-sc-6dc747-0 gFOUvY"]').get_attribute("innerText")
-        # difficulty = review.find_element_by_xpath('.//div[@class="CardNumRating__StyledCardNumRating-sc-17t4b9u-0 eWZmyX"]').get_attribute("innerText")
+    
         # print(class_level)
 
         content = review.find_element_by_xpath('.//div[@class = "Comments__StyledComments-dzzyvm-0 gRjWel"]').text
         date = review.find_element_by_xpath('.//div[@class="TimeStamp__StyledTimeStamp-sc-9q2r30-0 bXQmMr RatingHeader__RatingTimeStamp-sc-1dlkqw1-3 BlaCV"]').get_attribute("innerText")
         # print(content)
+
+        # assigning and writing values to our columns
         review_dict["professor"]= prof_names[count]
         review_dict["content"] = content
         review_dict["class_level"] = class_level
