@@ -34,6 +34,7 @@ driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), opti
 # driver.get("https://www.ratemyprofessors.com/search/teachers?query=*&sid=298")
 
 # passing in the url we want it to look at
+# in this script we don't actually get anything from the main page, but there might be some useful data there
 driver.get("https://www.ratemyprofessors.com/campusRatings.jsp?sid=298")
 
 # using the wait command to close a cookie popup that the previous options didn't account for
